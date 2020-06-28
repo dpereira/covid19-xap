@@ -1,0 +1,14 @@
+<html>
+<head>
+  <title>Covid19 em Chapecó</title>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+  <h1>Dados da Covid-19 no Município do Chapecó</h1>
+
+  <% charts.keys.each do |name|%>
+    <h2><%= name %></h2>
+    <%= charts[name] %>
+  <% end %>
+</body>
+</html>
