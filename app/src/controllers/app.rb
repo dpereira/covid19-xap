@@ -22,6 +22,7 @@ def csv(filename)
   suspected_home_isolation_series = []
   suspected_in_infirmary_series = []
   suspected_in_intensive_care_series = []
+  suspected_series = []
   tests_performed_series = []
 
   csv.each do |row|
@@ -48,6 +49,9 @@ def csv(filename)
     recovered = row[6]
     recovered_series.push([date, recovered])
 
+    suspected = row[9]
+    suspected_series.push([date, suspected])
+
     suspected_home_isolation = row[10]
     suspected_home_isolation_series.push([date, suspected_home_isolation])
 
@@ -72,6 +76,7 @@ def csv(filename)
     suspected_home_isolation_series: suspected_home_isolation_series,
     suspected_in_infirmary_series: suspected_in_infirmary_series,
     suspected_in_intensive_care_series: suspected_in_intensive_care_series,
+    suspected_series: suspected_series,
     tests_performed_series: tests_performed_series
   }
 end
@@ -88,24 +93,32 @@ class SimpleApp < Sinatra::Application
 
   def _charts
     data = csv('elastic-stack/data/chapeco.csv')
-    series = []
-    charts = {}
+    series = {}
 
     data.keys.each do |metric|
-      s = {
+      series[metric] = {
         name: metric,
         data: data[metric]
       }
-      series.push(s)
-      charts[metric] = line_chart(
-        [s],
+    end
+
+
+    charts = {}
+
+    charts['Totais'] = \
+      line_chart(
+        [
+          series[:active_series],
+          series[:recovered_series],
+          series[:confirmed_series],
+          series[:suspected_series]
+        ],
         {
           stroke: { curve: 'smooth', width: 2},
           animations: { enabled: false },
           markers: { size: 4 }
         }
       )
-    end
 
     return charts
   end
