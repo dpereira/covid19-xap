@@ -9,6 +9,21 @@ def html(filename, context={})
   return erb.result_with_hash(context)
 end
 
+$legend = {
+    active_series: 'Ativos',
+    confirmed_series: 'Confirmados',
+    death_series: 'Óbitos',
+    confirmed_home_isolation_series: 'Isolamento Domiciliar',
+    confirmed_in_infirmary_series: 'Confirmados',
+    confirmed_in_intensive_care_series: 'Confirmados',
+    recovered_series: 'Recuperados',
+    suspected_home_isolation_series: 'Isolamento Domiciliar',
+    suspected_in_infirmary_series: 'Suspeitos',
+    suspected_in_intensive_care_series: 'Suspeitos',
+    suspected_series: 'Suspeitos',
+    tests_performed_series: 'Testes Realizados'
+}
+
 def csv(filename)
   csv = CSV.read(filename)
 
@@ -92,18 +107,24 @@ class SimpleApp < Sinatra::Application
   end
 
   def _charts
-    data = csv('elastic-stack/data/chapeco.csv')
+    data = csv('app/data/chapeco.csv')
     series = {}
 
     data.keys.each do |metric|
       series[metric] = {
-        name: metric,
+        name: $legend[metric],
         data: data[metric]
       }
     end
 
 
     charts = {}
+
+    options = {
+      stroke: { curve: 'smooth', width: 2},
+      animations: { enabled: false },
+      markers: { size: 4 }
+    }
 
     charts['Totais'] = \
       line_chart(
@@ -113,11 +134,32 @@ class SimpleApp < Sinatra::Application
           series[:confirmed_series],
           series[:suspected_series]
         ],
-        {
-          stroke: { curve: 'smooth', width: 2},
-          animations: { enabled: false },
-          markers: { size: 4 }
-        }
+        options
+      )
+
+    charts['Óbitos'] = \
+      line_chart(
+        [
+          series[:death_series]
+        ],
+        options
+      )
+
+    charts['Testes Realizados'] = \
+      line_chart(
+        [
+          series[:tests_performed_series]
+        ],
+        options
+      )
+
+    charts['UTI'] = \
+      line_chart(
+        [
+          series[:suspected_in_intensive_care_series],
+          series[:confirmed_in_intensive_care_series]
+        ],
+        options
       )
 
     return charts
