@@ -162,11 +162,14 @@ class SimpleApp < Sinatra::Application
         options
       )
 
+    puts 'Charts created: %s' % [charts.keys]
+
     return charts
   end
 
 
   get '/' do
+    puts 'Called /'
     return html('app/src/views/index.erb', { charts: @charts})
   end
 
