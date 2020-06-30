@@ -7,7 +7,7 @@ services:
             network: host
         volumes:
             - type: bind
-              source: ./elastic-stack/data
+              source: ./data
               target: /data
         user: ${USER_ID}
         network_mode: host
@@ -21,7 +21,7 @@ services:
               source: ./data
               target: /input-data
             - type: bind
-              source: ./elastic-stack/data
+              source: ./data
               target: /output-data
         user: ${USER_ID}
         network_mode: host
