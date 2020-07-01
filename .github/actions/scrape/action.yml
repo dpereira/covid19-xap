@@ -1,0 +1,6 @@
+name: 'Scrape'
+description: 'Scrapes csv data from pdf data'
+runs:
+    using: 'docker'
+    image: 'Dockerfile'
+    entrypoint: './bin/scrape.sh'
