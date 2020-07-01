@@ -107,7 +107,7 @@ class SimpleApp < Sinatra::Application
   end
 
   def _charts
-    data = csv('data/chapeco.csv')
+    data = csv('data/csv/chapeco.csv')
     series = {}
 
     data.keys.each do |metric|
