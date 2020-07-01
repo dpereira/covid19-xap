@@ -6,5 +6,8 @@ action-download-chapeco-sms: $(CHAPECO_DATA_DIR)
 	https://www.chapeco.sc.gov.br/documentos/54/documentoCategoria \
 	-P $(PDF_DATA_DIR)
 
-action-pdf-scrape:
+action-pdf-scrape: scraper-setup
 	python scraper/scrape.py $(CHAPECO_DATA_DIR) $(CSV_DATA_DIR)/chapeco.csv
+
+scraper-setup:
+	pip install -r scraper/requirements.txt
