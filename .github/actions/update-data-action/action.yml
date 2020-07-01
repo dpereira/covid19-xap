@@ -1,0 +1,6 @@
+name: 'Update data'
+description: 'Updates csv data'
+runs:
+    using: 'docker'
+    image: 'Dockerfile'
+    entrypoint: 'make -C actions.mk action-download-chapeco-sms'
