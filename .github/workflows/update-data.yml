@@ -1,8 +1,6 @@
 name: Data Update
 
-on:
-  branches:
-    - master
+on: [push]
 
 jobs:
   name: Update
