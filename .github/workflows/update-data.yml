@@ -23,3 +23,4 @@ jobs:
           author_email: rockin.jack@gmail.com
           message: 'Auto data update'
           tag: 'latest-data'
+          force: true
