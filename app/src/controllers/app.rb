@@ -103,11 +103,12 @@ class SimpleApp < Sinatra::Application
   def initialize
     super
 
+    @filename = 'data/csv/chapeco.csv'
     @charts = self._charts
   end
 
   def _charts
-    data = csv('data/csv/chapeco.csv')
+    data = csv(@filename)
     series = {}
 
     data.keys.each do |metric|
@@ -170,7 +171,11 @@ class SimpleApp < Sinatra::Application
 
   get '/' do
     puts 'Called /'
-    return html('app/src/views/index.erb', { charts: @charts})
+    latest_timestamp = File.mtime(@filename)
+    return html(
+      'app/src/views/index.erb',
+      { charts: @charts, latest_timestamp: latest_timestamp}
+    )
   end
 
   run!
