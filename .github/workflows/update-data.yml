@@ -13,3 +13,5 @@ jobs:
         run: ls -alh ./
       - name: Update Data
         uses: ./.github/actions/update-data-action
+      - name: Scrape Data
+        uses: ./.github/actions/scrape-action
