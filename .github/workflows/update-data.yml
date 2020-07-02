@@ -27,3 +27,13 @@ jobs:
           message: 'Auto data update'
           tag: 'latest-data'
           force: true
+  deploy:
+	name: Deploy @ Heroky
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: akhileshns/heroku-deploy@v3.0.5 # This is the action
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "covid19-xap"
+          heroku_email: "rockin.jack@gmail.com"
