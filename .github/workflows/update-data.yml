@@ -28,7 +28,7 @@ jobs:
           tag: 'latest-data'
           force: true
   deploy:
-	name: Deploy @ Heroky
+    name: Deploy @ Heroky
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
