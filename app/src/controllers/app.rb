@@ -3,6 +3,7 @@ require 'erb'
 require 'sinatra/base'
 require 'apexcharts'
 require 'sinatra/reloader'
+require 'tzinfo'
 
 def html(filename, context={})
   erb = ERB.new(File.read(filename))
@@ -168,13 +169,19 @@ class SimpleApp < Sinatra::Application
     return charts
   end
 
+  def _timestamp
+    latest_timestamp = File.mtime(@filename)
+    tz = TZInfo::Timezone.get('America/Sao_Paulo')
+    return tz.strftime('%Hh%Mm%Ss %d/%m/%Y (UTC%Z)', latest_timestamp)
+  end
+
 
   get '/' do
-    puts 'Called /'
-    latest_timestamp = File.mtime(@filename)
+    ts = self._timestamp
+    puts ts
     return html(
       'app/src/views/index.erb',
-      { charts: @charts, latest_timestamp: latest_timestamp}
+      { charts: @charts, latest_timestamp: ts}
     )
   end
 
