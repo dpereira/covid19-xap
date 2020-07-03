@@ -1,17 +1,41 @@
 <html>
+
 <head>
-  <title>Covid19 em Chapecó</title>
-  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<title>Covid19 em Chapecó</title>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<style>
+
+.panel {
+  width: 50%;
+  flex-grow: 1;
+}
+
+.dashboard {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+@media only screen and (max-width: 800px) {
+  .panel {
+    width: 100%
+  }
+}
+
+</style>
 </head>
+
 <body>
   <h1>Dados da Covid-19 no Município de Chapecó</h1>
   <p><i>Última atualização: <%= latest_timestamp %></i></p>
 
-  <% charts.keys.each do |name|%>
-    <div style='display:inline;width:50%;float:left'>
-      <h2><%= name %></h2>
-      <%= charts[name] %>
-    </div>
-  <% end %>
+  <div class='dashboard'>
+    <% charts.keys.each do |name|%>
+      <div class='panel'>
+        <h2><%= name %></h2>
+        <%= charts[name] %>
+      </div>
+    <% end %>
+  </div>
 </body>
+
 </html>
