@@ -24,7 +24,12 @@ GEM
       sinatra (= 2.0.8.1)
       tilt (~> 2.0)
     smart_kv (0.2.8.1)
+    thread_safe (0.3.6-java)
     tilt (2.0.10)
+    tzinfo (1.2.7)
+      thread_safe (~> 0.1)
+    tzinfo-data (1.2020.1)
+      tzinfo (>= 1.0.0)
 
 PLATFORMS
   java
@@ -33,6 +38,11 @@ DEPENDENCIES
   apexcharts (= 0.1.9)
   sinatra (= 2.0.8.1)
   sinatra-contrib (= 2.0.8.1)
+  tzinfo (= 1.2.7)
+  tzinfo-data (= 1.2020.1)
+
+RUBY VERSION
+   ruby 2.5.3p0 (jruby 9.2.7.0)
 
 BUNDLED WITH
    2.1.4
