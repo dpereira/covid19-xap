@@ -177,11 +177,9 @@ class SimpleApp < Sinatra::Application
 
 
   get '/' do
-    ts = self._timestamp
-    puts ts
     return html(
       'app/src/views/index.erb',
-      { charts: @charts, latest_timestamp: ts}
+      { charts: @charts, latest_timestamp: self._timestamp}
     )
   end
 
