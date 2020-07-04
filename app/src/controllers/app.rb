@@ -139,18 +139,18 @@ class SimpleApp < Sinatra::Application
         options
       )
 
-    charts['Óbitos'] = \
-      line_chart(
-        [
-          series[:death_series]
-        ],
-        options
-      )
-
     charts['Testes Realizados'] = \
       line_chart(
         [
           series[:tests_performed_series]
+        ],
+        options
+    )
+
+   charts['Óbitos'] = \
+      line_chart(
+        [
+          series[:death_series]
         ],
         options
       )
