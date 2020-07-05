@@ -183,7 +183,7 @@ class SimpleApp < Sinatra::Application
     )
   end
 
-  get '/loaderio-9062b491158e6847ab220ae764edff3f' do
+  get '/loaderio-9062b491158e6847ab220ae764edff3f/' do
     return 'loaderio-9062b491158e6847ab220ae764edff3f'
   end
 
