@@ -5,27 +5,30 @@ import numpy
 import sys
 
 dtypes = {
-    'caso.csv': [
-        ('date', 'U10'),
-        ('state', 'U2'),
-        ('city', 'S128'),
-        ('place_type','U8'),
+    'chapeco.csv': [
+        ('active', int),
         ('confirmed', int),
-        ('deaths', int),
-        ('order_for_place', int),
-        ('is_last', 'U5'),
-        ('estimated_population_2019', int),
-        ('city_ibge_code', int),
-        ('confirmed_per_100k_inhabitants', 'U32'),
-        ('death_rate', 'U32')
+        ('confirmed_deaths', int),
+        ('confirmed_home_isolation', int),
+        ('confirmed_in_infirmary', int),
+        ('confirmed_in_intensive_care', int),
+        ('confirmed_recovered', int),
+        ('date', 'U10'),
+        ('discarded', int),
+        ('suspected', int),
+        ('suspected_home_isolation', int),
+        ('suspected_in_infirmary', int),
+        ('suspected_in_intensive_care', int),
+        ('tests_performed', int),
+        ('tracked', int)
     ]
 }
 
 
 def cities_data(data):
-    sorted_data = numpy.sort(data, order=('city', 'state'))
+    sorted_data = numpy.sort(data, order='date')[::-1]
 
-    current_city = sorted_data[0]['city']
+    current_city = 'chapeco'
     current_index = 0
 
     for i, entry in enumerate(sorted_data):
@@ -53,9 +56,13 @@ def extrapolate_city_data(city_data, field='confirmed', prior=5, after=14, order
         for day in city_data
     ]
 
+    print([d['date'] for d in city_data[-prior:] ])
+
     if len(city_data[field]) < prior:
         # not enough data
         return [], []
+
+    print(f'Priors for {field}: {city_data[field][-prior:]}')
 
     fit = numpy.polyfit(daystamps[-prior:], city_data[field][-prior:], order)
     p = numpy.poly1d(fit)
@@ -68,38 +75,20 @@ def extrapolate_city_data(city_data, field='confirmed', prior=5, after=14, order
     return extra_days, extra_data
 
 
-def extrapolate(data, prior=5, after=14, order=2):
+def extrapolate(data, prior=5, after=14, order=2, fields=['active', 'confirmed', 'confirmed_deaths', ]):
+    extra = {}
 
-    extrapolated = []
+    fields = [d for d in data.dtype.names if d != 'date']
 
-    for city_data in cities_data(data):
-        state = city_data[0]['state']
-        city = city_data[0]['city']
-        place_type = city_data[0]['place_type']
-        order_for_place = city_data[0]['order_for_place']
-        estimated_population_2019 = city_data[0]['estimated_population_2019'] or 1
-        city_ibge_code = city_data[0]['city_ibge_code']
-        is_last = False
-        extrapolation = True
+    for f in fields:
+        dates, values = extrapolate_city_data(data, field=f, prior=prior, after=after, order=order)
+        extra[f] = values
+        extra['date'] = dates
 
-        days, confirmed = extrapolate_city_data(city_data, field='confirmed', prior=prior, after=after, order=order)
-        days, deaths = extrapolate_city_data(city_data, field='deaths', prior=prior, after=after, order=order)
-
-        if not days or not confirmed or not deaths:
-            continue
-
-        data = [
-            (
-                days[i], state, city.decode('latin-1'), place_type, confirmed[i], deaths[i], order_for_place,
-                is_last, estimated_population_2019, city_ibge_code,
-                confirmed[i] / (estimated_population_2019 / 100000), deaths[i] / confirmed[i] if confirmed[i] else 0
-            )
-            for i in range(after)
-        ]
-
-        extrapolated += data
-
-    return extrapolated
+    return [
+        tuple((data[-1][f] if f not in fields and f != 'date' else extra[f][i] for f in data.dtype.names ))
+        for i in range(after)
+    ]
 
 
 def save(data, header_names, file_name):
@@ -126,4 +115,5 @@ if __name__ == "__main__":
     args = parse_args()
     data = load_data(args.input)
     e = extrapolate(data, args.prior, args.after, args.order)
+    print(e)
     save(e, data.dtype.names, args.output)
