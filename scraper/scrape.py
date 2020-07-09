@@ -58,7 +58,7 @@ def extract_data(text, pdf_filename):
 
 def enhance_datapoint(data, prior):
     try:
-        data['active'] = data['confirmed'] - data['confirmed_recovered']
+        data['active'] = data['confirmed'] - data['confirmed_recovered'] - data['confirmed_deaths']
     except KeyError:
         pass
 
