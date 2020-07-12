@@ -155,8 +155,8 @@ class SimpleApp < Sinatra::Application
       }
     )
 
-    charts['Totais'] = \
-      line_chart(
+    charts['Totais'] = {
+      chart: line_chart(
         [
           series[:active_series],
           series[:recovered_series],
@@ -167,28 +167,35 @@ class SimpleApp < Sinatra::Application
            colors: ['#CC0000', '#00CC00', '#AA00AA', '#CCCC00']
         })
       )
+    }
 
     total_tested = series[:tests_performed_series][:data].map do |date, value| value.to_i end.sum
+    tested_per_1000 = 1000 * total_tested / 216154
 
-    charts["Testes Realizados - <i>#{total_tested}</i>"] = \
-      column_chart(
+    charts["Testes Realizados"] = {
+      subtitle: "<b>Total</b>: <i>#{total_tested}</i> (#{tested_per_1000}/mil hab.)",
+      chart: column_chart(
         [
           series[:tests_performed_series]
         ],
         column_options
-    )
+      )
+
+    }
 
    _, current_deaths = series[:death_series][:data][-1]
-   charts["Óbitos - <i>#{current_deaths}</i>"] = \
-      column_chart(
+   charts["Óbitos"] = {
+     subtitle: "<b>Total</b>: <i>#{current_deaths}</i>",
+     chart: column_chart(
         [
           series[:delta_death_series]
         ],
         column_options
-   )
+     )
+   }
 
-    charts['Ocupação UTI'] = \
-      column_chart(
+    charts['Ocupação UTI'] = {
+      chart: column_chart(
         [
           series[:suspected_in_intensive_care_series],
           series[:confirmed_in_intensive_care_series]
@@ -201,6 +208,7 @@ class SimpleApp < Sinatra::Application
           dataLabels: { enabled: true, style: { colors: ['#000000']}}
         }
       )
+    }
 
     puts 'Charts created: %s' % [charts.keys]
 

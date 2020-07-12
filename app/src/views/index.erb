@@ -41,7 +41,10 @@
     <% charts.keys.each do |name|%>
       <div class='panel'>
         <h2><%= name %></h2>
-        <%= charts[name] %>
+        <% if charts[name][:subtitle] %>
+          <p><%= charts[name][:subtitle] %></p>
+        <% end %>
+        <%= charts[name][:chart] %>
       </div>
     <% end %>
   </div>
