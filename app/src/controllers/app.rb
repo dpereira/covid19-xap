@@ -164,7 +164,7 @@ class SimpleApp < Sinatra::Application
           series[:suspected_series]
         ],
         options.merge({
-           colors: ['#CC0000', '#00CC00', '#CC00CC', '#CCCC00']
+           colors: ['#CC0000', '#00CC00', '#AA00AA', '#CCCC00']
         })
       )
 
@@ -176,13 +176,14 @@ class SimpleApp < Sinatra::Application
         column_options
     )
 
-   charts['Óbitos'] = \
+   _, current_deaths = series[:death_series][:data][-1]
+   charts["Óbitos - #{current_deaths}"] = \
       column_chart(
         [
           series[:delta_death_series]
         ],
         column_options
-      )
+   )
 
     charts['Ocupação UTI'] = \
       column_chart(
@@ -191,6 +192,7 @@ class SimpleApp < Sinatra::Application
           series[:confirmed_in_intensive_care_series]
         ],
         {
+          colors: ['#CCCC00', '#AA00AA'],
           stacked: true,
           animations: { enabled: false },
           plotOptions: { bar: { dataLabels: { position: :center }}},
