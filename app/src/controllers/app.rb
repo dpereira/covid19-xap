@@ -168,7 +168,9 @@ class SimpleApp < Sinatra::Application
         })
       )
 
-    charts['Testes Realizados'] = \
+    total_tested = series[:tests_performed_series][:data].map do |date, value| value.to_i end.sum
+
+    charts["Testes Realizados - <i>#{total_tested}</i>"] = \
       column_chart(
         [
           series[:tests_performed_series]
@@ -177,7 +179,7 @@ class SimpleApp < Sinatra::Application
     )
 
    _, current_deaths = series[:death_series][:data][-1]
-   charts["Óbitos - #{current_deaths}"] = \
+   charts["Óbitos - <i>#{current_deaths}</i>"] = \
       column_chart(
         [
           series[:delta_death_series]

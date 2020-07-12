@@ -10,6 +10,10 @@
   flex-grow: 0;
 }
 
+.header {
+  text-align: center;
+}
+
 .dashboard {
   display: flex;
   flex-wrap: wrap;
@@ -28,8 +32,10 @@
 </head>
 
 <body>
-  <h1>Dados da Covid-19 no Município de Chapecó</h1>
-  <p><i>Última atualização: <%= latest_timestamp %></i></p>
+  <div class='header'>
+    <h1 class='title'>Dados da Covid-19 no Município de Chapecó</h1>
+    <p><i>Última atualização: <%= latest_timestamp %></i></p>
+  </div>
 
   <div class='dashboard'>
     <% charts.keys.each do |name|%>
