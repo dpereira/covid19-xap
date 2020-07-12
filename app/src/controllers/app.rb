@@ -14,6 +14,7 @@ $legend = {
     active_series: 'Ativos',
     confirmed_series: 'Confirmados',
     death_series: 'Óbitos',
+    delta_death_series: 'Óbitos',
     confirmed_home_isolation_series: 'Isolamento Domiciliar',
     confirmed_in_infirmary_series: 'Confirmados',
     confirmed_in_intensive_care_series: 'Confirmados',
@@ -24,6 +25,23 @@ $legend = {
     suspected_series: 'Suspeitos',
     tests_performed_series: 'Testes Realizados'
 }
+
+def delta(ary)
+  d = []
+
+  ary.each_index do |i|
+    date, value = ary[i]
+
+    if i > 0
+        _, previous = ary[i - 1]
+        value = value.to_i - previous.to_i
+
+      d.append([date, value])
+    end
+  end
+
+  return d
+end
 
 def csv(filename)
   csv = CSV.read(filename)
@@ -85,6 +103,7 @@ def csv(filename)
     active_series: active_series,
     confirmed_series: confirmed_series,
     death_series: death_series,
+    delta_death_series: delta(death_series),
     confirmed_home_isolation_series: confirmed_home_isolation_series,
     confirmed_in_infirmary_series: confirmed_in_infirmary_series,
     confirmed_in_intensive_care_series: confirmed_in_intensive_care_series,
@@ -97,6 +116,7 @@ def csv(filename)
   }
 end
 
+
 class SimpleApp < Sinatra::Application
 
   charts = :charts
@@ -105,17 +125,17 @@ class SimpleApp < Sinatra::Application
     super
 
     @filename = 'data/csv/chapeco.csv'
-    @charts = self._charts
+    @data = csv(@filename)
+    @charts = self._charts(@data)
   end
 
-  def _charts
-    data = csv(@filename)
+  def _charts(data, start_date=(Date.today - 30).strftime('%Y-%m-%d'), end_date=Date.today.strftime('%Y-%m-%d'))
     series = {}
 
     data.keys.each do |metric|
       series[metric] = {
         name: $legend[metric],
-        data: data[metric]
+        data: data[metric].select! do |date, value| date > start_date and date < end_date end
       }
     end
 
@@ -128,6 +148,13 @@ class SimpleApp < Sinatra::Application
       markers: { size: 4 }
     }
 
+    column_options = options.merge(
+      {
+        plotOptions: { bar: { dataLabels: { position: :top }}},
+        dataLabels: { enabled: true, offsetY: -20, style: { colors: ['#000000']}}
+      }
+    )
+
     charts['Totais'] = \
       line_chart(
         [
@@ -136,32 +163,39 @@ class SimpleApp < Sinatra::Application
           series[:confirmed_series],
           series[:suspected_series]
         ],
-        options
+        options.merge({
+           colors: ['#CC0000', '#00CC00', '#CC00CC', '#CCCC00']
+        })
       )
 
     charts['Testes Realizados'] = \
-      line_chart(
+      column_chart(
         [
           series[:tests_performed_series]
         ],
-        options
+        column_options
     )
 
    charts['Óbitos'] = \
-      line_chart(
+      column_chart(
         [
-          series[:death_series]
+          series[:delta_death_series]
         ],
-        options
+        column_options
       )
 
-    charts['UTI'] = \
-      line_chart(
+    charts['Ocupação UTI'] = \
+      column_chart(
         [
           series[:suspected_in_intensive_care_series],
           series[:confirmed_in_intensive_care_series]
         ],
-        options
+        {
+          stacked: true,
+          animations: { enabled: false },
+          plotOptions: { bar: { dataLabels: { position: :center }}},
+          dataLabels: { enabled: true, style: { colors: ['#000000']}}
+        }
       )
 
     puts 'Charts created: %s' % [charts.keys]

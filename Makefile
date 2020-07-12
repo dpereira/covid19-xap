@@ -69,3 +69,6 @@ pdf-extract:
 
 ./data/%.csv: $(CSV_DATA_DIR)/%.csv.gz
 	gunzip -c $< > $@
+
+run:
+	ruby config.ru
