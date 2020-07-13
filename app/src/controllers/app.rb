@@ -12,17 +12,21 @@ end
 
 $legend = {
     active_series: 'Ativos',
+    delta_active_series: 'Ativos',
     confirmed_series: 'Confirmados',
+    delta_confirmed_series: 'Confirmados',
     death_series: 'Óbitos',
     delta_death_series: 'Óbitos',
     confirmed_home_isolation_series: 'Isolamento Domiciliar',
     confirmed_in_infirmary_series: 'Confirmados',
     confirmed_in_intensive_care_series: 'Confirmados',
     recovered_series: 'Recuperados',
+    delta_recovered_series: 'Recuperados',
     suspected_home_isolation_series: 'Isolamento Domiciliar',
     suspected_in_infirmary_series: 'Suspeitos',
     suspected_in_intensive_care_series: 'Suspeitos',
     suspected_series: 'Suspeitos',
+    delta_suspected_series: 'Suspeitos',
     tests_performed_series: 'Testes Realizados',
     tested_series: 'Testes Realizados',
     delta_tested_series: 'Testes Realizados',
@@ -113,17 +117,21 @@ def csv(filename)
 
   return {
     active_series: active_series,
+    delta_active_series: delta(active_series),
     confirmed_series: confirmed_series,
+    delta_confirmed_series: delta(confirmed_series),
     death_series: death_series,
     delta_death_series: delta(death_series),
     confirmed_home_isolation_series: confirmed_home_isolation_series,
     confirmed_in_infirmary_series: confirmed_in_infirmary_series,
     confirmed_in_intensive_care_series: confirmed_in_intensive_care_series,
     recovered_series: recovered_series,
+    delta_recovered_series: delta(recovered_series),
     suspected_home_isolation_series: suspected_home_isolation_series,
     suspected_in_infirmary_series: suspected_in_infirmary_series,
     suspected_in_intensive_care_series: suspected_in_intensive_care_series,
     suspected_series: suspected_series,
+    delta_suspected_series: delta(suspected_series),
     tests_performed_series: tests_performed_series,
     tested_series: tested_series,
     delta_tested_series: delta(tested_series),
@@ -145,7 +153,7 @@ class Covid19Xap < Sinatra::Application
     @charts = self._charts(@data)
   end
 
-  def _charts(data, start_date=(Date.today - 45).strftime('%Y-%m-%d'), end_date=Date.today.strftime('%Y-%m-%d'))
+  def _charts(data, start_date=(Date.today - 20).strftime('%Y-%m-%d'), end_date=Date.today.strftime('%Y-%m-%d'))
     series = {}
 
     data.keys.each do |metric|
@@ -154,7 +162,6 @@ class Covid19Xap < Sinatra::Application
         data: data[metric].select do |date, value| date > start_date and date < end_date end
       }
     end
-
 
     charts = {}
 
@@ -184,6 +191,22 @@ class Covid19Xap < Sinatra::Application
         })
       )
     }
+
+    charts['Variação'] = {
+      chart: column_chart(
+        [
+          series[:delta_active_series],
+          series[:delta_confirmed_series],
+          #series[:delta_recovered_series],
+          #series[:delta_suspected_series],
+        ],
+        column_options.merge({
+          height: '250px',
+          colors: ['#CC0000', '#AA00AA', '#00CC00', '#CCCC00']
+        })
+      )
+    }
+
 
     _, total_tested = data[:tested_series][-1]
     tested_per_1000 = 1000 * total_tested.to_i / 216154
