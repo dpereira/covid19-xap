@@ -1,6 +1,7 @@
 <html>
 
 <head>
+<meta property='og:image' content='https://i.ibb.co/cY40Q42/Screenshot-from-2020-07-12-23-21-29.png'/>
 <title>Covid19 em Chapecó</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <style>
@@ -21,11 +22,23 @@
   justify-content: center;
 }
 
+.footer {
+	font-size: 12px;
+	text-color: black;
+    text-align: center;
+    margin-top: 20px;
+}
+
 @media only screen and (max-width: 1080px) {
   .panel {
     width: 100%;
     flex-grow: 1;
   }
+}
+
+body {
+   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+   font-weight: 300;
 }
 
 </style>
@@ -34,7 +47,7 @@
 <body>
   <div class='header'>
     <h1 class='title'>Dados da Covid-19 no Município de Chapecó</h1>
-    <p><i>Última atualização: <%= latest_timestamp %></i></p>
+    <p>Atualizado em: <%= latest_timestamp %></p>
   </div>
 
   <div class='dashboard'>
@@ -47,6 +60,9 @@
         <%= charts[name][:chart] %>
       </div>
     <% end %>
+  </div>
+  <div class='footer'>
+	<a href='https://www.chapeco.sc.gov.br/documentos/54/documentoCategoria' target='#'>Fonte dos dados.</a>
   </div>
 </body>
 

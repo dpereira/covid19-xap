@@ -20,8 +20,12 @@ def extract_text(pdf_filename):
 
 
 def extract_data(text, pdf_filename):
+    defaults = {
+        'tested': 0
+    }
     regex = {
         'tracked': '\n(.+)\nmonitorados',
+        'tested': '\n(.+)\ntestados',
         'discarded': '\n(.+)\ndescartados',
         'confirmed': '\n(.+)\nconfirmados',
         'confirmed_in_infirmary': '\n(.+)\ninternados em',
@@ -52,6 +56,8 @@ def extract_data(text, pdf_filename):
         if m:
             data[name] = convert(m.groups()[0].replace('.', ''))
             search_from += m.span()[1]
+        elif name in defaults:
+            data[name] = defaults[name]
 
     return data
 
@@ -59,16 +65,16 @@ def extract_data(text, pdf_filename):
 def enhance_datapoint(data, prior):
     try:
         data['active'] = data['confirmed'] - data['confirmed_recovered'] - data['confirmed_deaths']
-    except KeyError:
-        pass
+    except (KeyError, TypeError, ValueError):
+        data['active'] = prior['active']
 
     data['tests_performed'] = 0
 
     if prior:
         try:
             data['tests_performed'] = data['confirmed'] + data['discarded'] - (prior['confirmed'] + prior['discarded'])
-        except KeyError:
-            pass
+        except (KeyError, TypeError, ValueError):
+            data['tests_performed'] = prior['tests_performed']
 
 
 def enhance(dataset):
