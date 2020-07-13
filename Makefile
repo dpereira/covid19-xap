@@ -62,7 +62,7 @@ extrapolate: ./data/caso-extra.csv
 extract: pdf-extract
 
 pdf-extract:
-	docker-compose run scraper python scraper/scrape.py /input-data/pdf/chapeco /output-data/chapeco.csv
+	docker-compose run scraper python scraper/scrape.py /input-data/pdf/chapeco /output-data/csv/chapeco.csv
 
 ./data/%-extra.csv: ./data/%.csv
 	docker-compose run extrapolation python /extrapolation/extrapolate.py /data/`basename $<` /data/`basename $@` --prior 60 --after 30 --order 2

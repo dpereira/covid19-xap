@@ -21,7 +21,7 @@ services:
               source: ./data
               target: /input-data
             - type: bind
-              source: ./data
+              source: ./data/
               target: /output-data
         user: ${USER_ID}
         network_mode: host

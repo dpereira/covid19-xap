@@ -23,7 +23,11 @@ $legend = {
     suspected_in_infirmary_series: 'Suspeitos',
     suspected_in_intensive_care_series: 'Suspeitos',
     suspected_series: 'Suspeitos',
-    tests_performed_series: 'Testes Realizados'
+    tests_performed_series: 'Testes Realizados',
+    tested_series: 'Testes Realizados',
+    delta_tested_series: 'Testes Realizados',
+    tracked_series: 'Monitorados',
+    delta_tracked_series: 'Monitorados'
 }
 
 def delta(ary)
@@ -58,6 +62,8 @@ def csv(filename)
   suspected_in_intensive_care_series = []
   suspected_series = []
   tests_performed_series = []
+  tested_series = []
+  tracked_series = []
 
   csv.each do |row|
     date = row[7]
@@ -95,8 +101,14 @@ def csv(filename)
     suspected_in_intensive_care = row[12]
     suspected_in_intensive_care_series.push([date, suspected_in_intensive_care])
 
-    tests_performed = row[13]
+    tested = row[13]
+    tested_series.push([date, tested])
+
+    tests_performed = row[14]
     tests_performed_series.push([date, tests_performed])
+
+    tracked = row[15]
+    tracked_series.push([date, tracked])
   end
 
   return {
@@ -112,12 +124,16 @@ def csv(filename)
     suspected_in_infirmary_series: suspected_in_infirmary_series,
     suspected_in_intensive_care_series: suspected_in_intensive_care_series,
     suspected_series: suspected_series,
-    tests_performed_series: tests_performed_series
+    tests_performed_series: tests_performed_series,
+    tested_series: tested_series,
+    delta_tested_series: delta(tested_series),
+    tracked_series: tracked_series,
+    delta_tracked_series: delta(tracked_series),
   }
 end
 
 
-class SimpleApp < Sinatra::Application
+class Covid19Xap < Sinatra::Application
 
   charts = :charts
 
@@ -129,13 +145,13 @@ class SimpleApp < Sinatra::Application
     @charts = self._charts(@data)
   end
 
-  def _charts(data, start_date=(Date.today - 30).strftime('%Y-%m-%d'), end_date=Date.today.strftime('%Y-%m-%d'))
+  def _charts(data, start_date=(Date.today - 45).strftime('%Y-%m-%d'), end_date=Date.today.strftime('%Y-%m-%d'))
     series = {}
 
     data.keys.each do |metric|
       series[metric] = {
         name: $legend[metric],
-        data: data[metric].select! do |date, value| date > start_date and date < end_date end
+        data: data[metric].select do |date, value| date > start_date and date < end_date end
       }
     end
 
@@ -169,30 +185,30 @@ class SimpleApp < Sinatra::Application
       )
     }
 
-    total_tested = series[:tests_performed_series][:data].map do |date, value| value.to_i end.sum
-    tested_per_1000 = 1000 * total_tested / 216154
+    _, total_tested = data[:tested_series][-1]
+    tested_per_1000 = 1000 * total_tested.to_i / 216154
 
     charts["Testes Realizados"] = {
       subtitle: "<b>Total</b>: <i>#{total_tested}</i> (#{tested_per_1000}/mil hab.)",
       chart: column_chart(
         [
-          series[:tests_performed_series]
+          series[:delta_tested_series]
         ],
         column_options
       )
 
     }
 
-   _, current_deaths = series[:death_series][:data][-1]
-   charts["Óbitos"] = {
-     subtitle: "<b>Total</b>: <i>#{current_deaths}</i>",
-     chart: column_chart(
-        [
-          series[:delta_death_series]
-        ],
-        column_options
-     )
-   }
+    _, current_deaths = data[:death_series][-1]
+    charts["Óbitos"] = {
+      subtitle: "<b>Total</b>: <i>#{current_deaths}</i>",
+      chart: column_chart(
+         [
+           series[:delta_death_series]
+         ],
+         column_options
+      )
+    }
 
     charts['Ocupação UTI'] = {
       chart: column_chart(
@@ -218,7 +234,7 @@ class SimpleApp < Sinatra::Application
   def _timestamp
     latest_timestamp = File.mtime(@filename)
     tz = TZInfo::Timezone.get('America/Sao_Paulo')
-    return tz.strftime('%Hh%Mm%Ss %d/%m/%Y (UTC%Z)', latest_timestamp)
+    return tz.strftime('<i>%d/%m %H:%M</i>', latest_timestamp)
   end
 
 

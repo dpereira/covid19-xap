@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /css/
+Disallow: /_del/
+Disallow: /gzip/
+Disallow: /js/
+Disallow: /jquery/
+Disallow: /swf/
+
+Disallow: /*Adobe $
+Disallow: /*Plugin Adobe Flash Player (version 8 or above) is required for the site. Click here for the free download. Back for initial page$
