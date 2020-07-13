@@ -233,11 +233,27 @@ class Covid19Xap < Sinatra::Application
       )
     }
 
-    charts['Ocupação UTI'] = {
+    charts['UTI'] = {
       chart: column_chart(
         [
           series[:suspected_in_intensive_care_series],
           series[:confirmed_in_intensive_care_series]
+        ],
+        {
+          colors: ['#CCCC00', '#AA00AA'],
+          stacked: true,
+          animations: { enabled: false },
+          plotOptions: { bar: { dataLabels: { position: :center }}},
+          dataLabels: { enabled: true, style: { colors: ['#000000']}}
+        }
+      )
+    }
+
+    charts['Enfermaria'] = {
+      chart: column_chart(
+        [
+          series[:suspected_in_infirmary_series],
+          series[:confirmed_in_infirmary_series]
         ],
         {
           colors: ['#CCCC00', '#AA00AA'],
