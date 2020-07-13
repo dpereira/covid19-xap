@@ -153,7 +153,7 @@ class Covid19Xap < Sinatra::Application
     @charts = self._charts(@data)
   end
 
-  def _charts(data, start_date=(Date.today - 20).strftime('%Y-%m-%d'), end_date=Date.today.strftime('%Y-%m-%d'))
+  def _charts(data, start_date=(Date.today - 60).strftime('%Y-%m-%d'), end_date=Date.today.strftime('%Y-%m-%d'))
     series = {}
 
     data.keys.each do |metric|
@@ -192,17 +192,17 @@ class Covid19Xap < Sinatra::Application
       )
     }
 
-    charts['Variação'] = {
+    charts['Variação de Casos Ativos'] = {
       chart: column_chart(
         [
           series[:delta_active_series],
-          series[:delta_confirmed_series],
+          #series[:delta_confirmed_series],
           #series[:delta_recovered_series],
           #series[:delta_suspected_series],
         ],
         column_options.merge({
           height: '250px',
-          colors: ['#CC0000', '#AA00AA', '#00CC00', '#CCCC00']
+          colors: ['#CC0000', '#AA00AA', '#00CC00', '#CCCC00'],
         })
       )
     }
