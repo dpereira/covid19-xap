@@ -31,7 +31,8 @@ $legend = {
     tested_series: 'Testes Realizados',
     delta_tested_series: 'Testes Realizados',
     tracked_series: 'Monitorados',
-    delta_tracked_series: 'Monitorados'
+    delta_tracked_series: 'Monitorados',
+    positive_rate_series: 'Taxa de Positivos'
 }
 
 def delta(ary)
@@ -43,13 +44,28 @@ def delta(ary)
     if i > 0
         _, previous = ary[i - 1]
         value = value.to_i - previous.to_i
-
-      d.append([date, value])
     end
+
+    d.append([date, value])
   end
 
   return d
 end
+
+
+def rate(ary1, ary2)
+  d = []
+
+  ary1.each_index do |i|
+    date, v1 = ary1[i]
+    _, v2 = ary2[i]
+
+    d.append([date, v2.to_f > 0 ? (v1.to_f / v2.to_f) : 0 ])
+  end
+
+  return d
+end
+
 
 def csv(filename)
   csv = CSV.read(filename)
@@ -68,8 +84,15 @@ def csv(filename)
   tests_performed_series = []
   tested_series = []
   tracked_series = []
+  positive_rate_series = []
+
+  first = true
 
   csv.each do |row|
+    if first
+      first = false
+      next
+    end
     date = row[7]
 
     active = row[0]
@@ -113,6 +136,9 @@ def csv(filename)
 
     tracked = row[15]
     tracked_series.push([date, tracked])
+
+    #positive_rate = tested.to_f > 0 ? (confirmed.to_f / tested.to_f) : 0
+    #positive_rate_series.push([date, positive_rate])
   end
 
   return {
@@ -137,6 +163,7 @@ def csv(filename)
     delta_tested_series: delta(tested_series),
     tracked_series: tracked_series,
     delta_tracked_series: delta(tracked_series),
+    positive_rate_series: rate(delta(confirmed_series), tests_performed_series),
   }
 end
 
@@ -207,6 +234,42 @@ class Covid19Xap < Sinatra::Application
       )
     }
 
+    charts['Taxa de Positivos (%) <a target="#" href="https://ourworldindata.org/coronavirus-testing#the-positive-rate-are-countries-testing-enough-to-monitor-their-outbreak">*</a>'] = {
+      chart: column_chart(
+        [
+          series[:positive_rate_series],
+          #series[:delta_confirmed_series],
+          #series[:tests_performed_series],
+          #series[:delta_suspected_series],
+        ],
+        column_options.merge({
+          colors: ['#CC0000', '#AA00AA', '#00CC00', '#CCCC00'],
+          yaxis: {
+            max: 1,
+            labels: {
+              formatter: {
+                function: {
+                  args: 'value',
+                  body: 'return (value * 100).toFixed(0) +\'%\''
+                }
+              }
+            }
+          },
+          dataLabels: {
+            enabled: true,
+            offsetY: -20,
+            style: { colors: ['#000000']},
+            formatter: {
+              function: {
+                args: 'value',
+                body: 'return (value * 100).toFixed(0)'
+              }
+            }
+          }
+        })
+      )
+    }
+
 
     _, total_tested = data[:tested_series][-1]
     tested_per_1000 = 1000 * total_tested.to_i / 216154
@@ -215,7 +278,7 @@ class Covid19Xap < Sinatra::Application
       subtitle: "<b>Total</b>: <i>#{total_tested}</i> (#{tested_per_1000}/mil hab.)",
       chart: column_chart(
         [
-          series[:delta_tested_series]
+          series[:tests_performed_series]
         ],
         column_options
       )
@@ -223,13 +286,14 @@ class Covid19Xap < Sinatra::Application
     }
 
     _, current_deaths = data[:death_series][-1]
+    max_deaths = series[:delta_death_series][:data].map do |a, b| b end.max + 1
     charts["Óbitos"] = {
       subtitle: "<b>Total</b>: <i>#{current_deaths}</i>",
       chart: column_chart(
          [
            series[:delta_death_series]
          ],
-         column_options
+         column_options.merge({ yaxis: { max: max_deaths} })
       )
     }
 

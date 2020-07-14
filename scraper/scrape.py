@@ -74,7 +74,7 @@ def enhance_datapoint(data, prior):
         try:
             data['tests_performed'] = data['confirmed'] + data['discarded'] - (prior['confirmed'] + prior['discarded'])
         except (KeyError, TypeError, ValueError):
-            data['tests_performed'] = prior['tests_performed']
+            data['tests_performed'] = ''
 
 
 def enhance(dataset):
