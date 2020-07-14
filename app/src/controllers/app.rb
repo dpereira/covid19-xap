@@ -234,7 +234,8 @@ class Covid19Xap < Sinatra::Application
       )
     }
 
-    charts['Taxa de Positivos (%) <a target="#" href="https://ourworldindata.org/coronavirus-testing#the-positive-rate-are-countries-testing-enough-to-monitor-their-outbreak">*</a>'] = {
+    charts['Taxa de Positivos (%)'] = {
+      subtitle: '<p>Percentual de testes com resultado positivo em relação ao total testado, por dia.</p><p><i>"A OMS sugere uma taxa de positivos entre 3 e 12% como um medidor geral de níveis de testagem adequados".<a target="#" href="https://ourworldindata.org/coronavirus-testing#the-positive-rate-are-countries-testing-enough-to-monitor-their-outbreak">¹</a></i></p>',
       chart: column_chart(
         [
           series[:positive_rate_series],
