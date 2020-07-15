@@ -186,7 +186,7 @@ class Covid19Xap < Sinatra::Application
     data.keys.each do |metric|
       series[metric] = {
         name: $legend[metric],
-        data: data[metric].select do |date, value| date > start_date and date < end_date end
+        data: data[metric].select do |date, value| date > start_date and date <= end_date end
       }
     end
 
