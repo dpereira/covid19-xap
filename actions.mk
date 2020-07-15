@@ -7,7 +7,7 @@ action-download-chapeco-sms: $(CHAPECO_DATA_DIR)
 	-P $(CHAPECO_DATA_DIR)
 
 action-pdf-scrape: scraper-setup $(CSV_DATA_DIR)
-	python scraper/scrape.py $(CHAPECO_DATA_DIR) $(CSV_DATA_DIR)/csv/chapeco.csv
+	python scraper/scrape.py $(CHAPECO_DATA_DIR) $(CSV_DATA_DIR)/chapeco.csv
 
 scraper-setup:
 	pip install -r scraper/requirements.txt
