@@ -5,7 +5,7 @@ on:
     branches:
     - master
   schedule:
-    - cron: '30 12-15,23 * * *'
+    - cron: '30 12-15,18-21,23 * * *'
 
 jobs:
   update-data-job:
