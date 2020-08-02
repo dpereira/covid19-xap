@@ -32,7 +32,9 @@ $legend = {
     delta_tested_series: 'Testes Realizados',
     tracked_series: 'Monitorados',
     delta_tracked_series: 'Monitorados',
-    positive_rate_series: 'Taxa de Positivos'
+    positive_rate_series: 'Taxa de Positivos',
+    private_icu_series: 'UTI Privada',
+    public_icu_series: 'UTI Pública',
 }
 
 def delta(ary)
@@ -52,7 +54,6 @@ def delta(ary)
   return d
 end
 
-
 def rate(ary1, ary2)
   d = []
 
@@ -65,7 +66,6 @@ def rate(ary1, ary2)
 
   return d
 end
-
 
 def csv(filename)
   csv = CSV.read(filename)
@@ -167,6 +167,34 @@ def csv(filename)
   }
 end
 
+def icu_csv(filename)
+  csv = CSV.read(filename)
+
+  first = true
+
+  private_icu_series = []
+  public_icu_series = []
+
+  csv.each do |row|
+    if first
+      first = false
+      next
+    end
+
+    date = row[0]
+    private_icu = row[1]
+    public_icu = row[2]
+
+    private_icu_series.push([date, private_icu])
+    public_icu_series.push([date, public_icu])
+  end
+
+  return {
+    private_icu_series: private_icu_series,
+    public_icu_series: public_icu_series
+  }
+
+end
 
 class Covid19Xap < Sinatra::Application
 
@@ -176,11 +204,13 @@ class Covid19Xap < Sinatra::Application
     super
 
     @filename = 'data/csv/chapeco.csv'
+    @icu_filename = 'data/csv/chapeco-icu.csv'
     @data = csv(@filename)
-    @charts = self._charts(@data)
+    @icu_data = icu_csv(@icu_filename)
+    @charts = self._charts(@data, @icu_data)
   end
 
-  def _charts(data, start_date=(Date.today - 60).strftime('%Y-%m-%d'), end_date=Date.today.strftime('%Y-%m-%d'))
+  def _charts(data, icu_data, start_date=(Date.today - 60).strftime('%Y-%m-%d'), end_date=Date.today.strftime('%Y-%m-%d'))
     series = {}
 
     data.keys.each do |metric|
@@ -189,6 +219,16 @@ class Covid19Xap < Sinatra::Application
         data: data[metric].select do |date, value| date > start_date and date <= end_date end
       }
     end
+
+    puts icu_data[:private_icu_series]
+
+    icu_data.keys.each do |metric|
+      series[metric] = {
+        name: $legend[metric],
+        data: icu_data[metric].select do |date, value| date > start_date and date <= end_date end
+      }
+    end
+
 
     charts = {}
 
@@ -204,6 +244,29 @@ class Covid19Xap < Sinatra::Application
         dataLabels: { enabled: true, offsetY: -20, style: { colors: ['#000000']}}
       }
     )
+
+    charts['Ocupação UTI (%)'] = {
+      chart: column_chart(
+        [
+          series[:private_icu_series],
+          series[:public_icu_series]
+        ],
+        column_options.merge({
+          colors: ['#CC0000', '#AA00AA', '#00CC00', '#CCCC00'],
+          yaxis: {
+            max: 100,
+            labels: {
+              formatter: {
+                function: {
+                  args: 'value',
+                  body: 'return (value).toFixed(0) +\'%\''
+                }
+              }
+            }
+          },
+        })
+      )
+    }
 
     charts['Totais'] = {
       chart: line_chart(
@@ -298,7 +361,7 @@ class Covid19Xap < Sinatra::Application
       )
     }
 
-    charts['UTI'] = {
+    charts['Leitos UTI'] = {
       chart: column_chart(
         [
           series[:suspected_in_intensive_care_series],
@@ -314,7 +377,7 @@ class Covid19Xap < Sinatra::Application
       )
     }
 
-    charts['Enfermaria'] = {
+    charts['Leitos Enfermaria'] = {
       chart: column_chart(
         [
           series[:suspected_in_infirmary_series],
