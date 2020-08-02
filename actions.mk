@@ -10,7 +10,7 @@ action-download-chapeco-sms: $(CHAPECO_DATA_DIR)
 	https://www.chapeco.sc.gov.br/documentos/67/documentoCategoria \
 	-P $(CHAPECO_DOCX_DATA_DIR)
 
-action-pdf-scrape: scraper-setup $(CSV_DATA_DIR) extract
+action-pdf-scrape: scraper-setup $(CSV_DATA_DIR)
 	python scraper/scrape.py $(CHAPECO_DATA_DIR) $(CSV_DATA_DIR)/chapeco.csv $(CHAPECO_DOCX_DATA_DIR) $(CSV_DATA_DIR)/chapeco-icu.csv
 
 scraper-setup:
