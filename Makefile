@@ -1,5 +1,5 @@
 .PHONY: \
-	setup download collect clean clean-pdf \
+	setup download clean clean-pdf \
 	extrapolate extract pdf-extract update-data \
 	download-brasil-io download-chapeco-sms
 
@@ -53,9 +53,7 @@ download-chapeco-sms: $(CHAPECO_DATA_DIR)
 		https://www.chapeco.sc.gov.br/documentos/54/documentoCategoria \
 		-P /data/pdf/chapeco/
 
-download: download-brasil-io download-chapeco-sms
-
-collect: ./data/caso.csv ./data/boletim.csv ./data/obito_cartorio.csv
+download: download-chapeco-sms
 
 extrapolate: ./data/caso-extra.csv
 
