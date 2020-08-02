@@ -6,6 +6,7 @@
 OS=$(shell uname -s)
 CSV_DATA_DIR=data/csv/
 PDF_DATA_DIR=data/pdf/
+DOCX_DATA_DIR=data/docx/
 CHAPECO_DATA_DIR=$(PDF_DATA_DIR)/chapeco/
 ifndef PROJECT_NAME
 PROJECT_NAME=$(shell basename `pwd`)
@@ -18,6 +19,9 @@ $(CSV_DATA_DIR):
 
 $(PDF_DATA_DIR):
 	mkdir -p $(PDF_DATA_DIR)
+
+$(DOCX_DATA_DIR):
+	mkdir -p $(DOCX_DATA_DIR)
 
 $(CHAPECO_DATA_DIR): $(PDF_DATA_DIR)
 	mkdir -p $(CHAPECO_DATA_DIR)
@@ -52,6 +56,11 @@ download-chapeco-sms: $(CHAPECO_DATA_DIR)
 		-R 'seguranca*' -A DocumentoArquivo,pdf \
 		https://www.chapeco.sc.gov.br/documentos/54/documentoCategoria \
 		-P /data/pdf/chapeco/
+	docker-compose run downloader \
+		wget -c --content-disposition -nd  -r -l 1 \
+		-R 'seguranca*' -A DocumentoArquivo,docx \
+		https://www.chapeco.sc.gov.br/documentos/67/documentoCategoria \
+		-P /data/docx/chapeco/
 
 download: download-chapeco-sms
 
