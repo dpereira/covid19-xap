@@ -1,6 +1,6 @@
 .PHONY: \
 	setup download clean clean-pdf \
-	extrapolate extract pdf-extract update-data \
+	extrapolate extract update-data \
 	download-brasil-io download-chapeco-sms
 
 OS=$(shell uname -s)
@@ -27,11 +27,7 @@ $(CHAPECO_DATA_DIR): $(PDF_DATA_DIR)
 	mkdir -p $(CHAPECO_DATA_DIR)
 
 setup:
-	pip install -r requirements.txt
-	make build
-	make download
-	make extract
-	make extrapolate
+	docker-compose build
 
 update-data: clean download extract extrapolate
 
@@ -66,10 +62,8 @@ download: download-chapeco-sms
 
 extrapolate: ./data/caso-extra.csv
 
-extract: pdf-extract
-
-pdf-extract:
-	docker-compose run scraper python scraper/scrape.py /input-data/pdf/chapeco /output-data/csv/chapeco.csv
+extract:
+	docker-compose run scraper python scraper/scrape.py /input-data/pdf/chapeco /output-data/csv/chapeco.csv /input-data/docx/chapeco /output-data/csv/chapeco-icu.csv
 
 ./data/%-extra.csv: ./data/%.csv
 	docker-compose run extrapolation python /extrapolation/extrapolate.py /data/`basename $<` /data/`basename $@` --prior 60 --after 30 --order 2

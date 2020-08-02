@@ -21,7 +21,7 @@ jobs:
       - name: Commit
         uses: EndBug/add-and-commit@v4
         with:
-          add: data/csv/chapeco.csv
+          add: data/csv/chapeco*.csv
           author_name: Diego Pereira
           author_email: rockin.jack@gmail.com
           message: 'Auto data update'
