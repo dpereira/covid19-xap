@@ -1,12 +1,18 @@
 import csv
 import datetime
+import docx2txt
 import os
 import os.path
 import PyPDF2
 import re
 import sys
 
-def extract_text(pdf_filename):
+
+def extract_docx_text(docx_filename):
+    return docx2txt.process(docx_filename)
+
+
+def extract_pdf_text(pdf_filename):
     text = ''
 
     with open(pdf_filename, 'rb') as f:
@@ -19,10 +25,35 @@ def extract_text(pdf_filename):
     return text
 
 
-def extract_data(text, pdf_filename):
+def extract_filename_date(filename):
+    date_separator_index = filename.find('_')
+    date = filename[:date_separator_index]
+    return datetime.datetime.strptime(date, '%d%m%Y')
+
+
+def extract_docx_data(text, docx_filename):
+
+    regex = {
+        'public_icu_occupation': 'LEITOS UTI PÚBLICO\n\n(\\d+) %',
+        'private_icu_occupation': 'LEITOS UTI PRIVADO\n\n(\\d+) %'
+    }
+
+    parsed_date = extract_filename_date(docx_filename)
+
+    data = {
+        'date': parsed_date.strftime('%Y-%m-%d')
+    }
+
+    data.update(extract_from_text(regex, text))
+
+    return data
+
+
+def extract_pdf_data(text, pdf_filename):
     defaults = {
         'tested': 0
     }
+
     regex = {
         'tracked': '\n(.+)\nmonitorados',
         'tested': '\n(.+)\ntestados',
@@ -40,15 +71,21 @@ def extract_data(text, pdf_filename):
         'suspected_home_isolation': '\n(.+)\nisolamento',
     }
 
-    date_separator_index = pdf_filename.find('_')
-    date = pdf_filename[:date_separator_index]
-    parsed_date = datetime.datetime.strptime(date, '%d%m%Y')
+    parsed_date = extract_filename_date(pdf_filename)
     
     data = {
         'date': parsed_date.strftime('%Y-%m-%d')
     }
 
+    data.update(extract_from_text(regex, text, defaults))
+
+    return data
+
+
+def extract_from_text(regex, text, defaults={}):
     search_from = 0
+
+    data = {}
 
     for name, pattern in regex.items():
         m = re.search(pattern, text[search_from:], flags = re.IGNORECASE | re.MULTILINE)
@@ -111,19 +148,33 @@ def write_csv(data, output):
             previous = filled
 
 
-def process_files(input_directory, output_csv):
+def process_pdf_files(input_directory, output_csv):
     pdf_files = sorted([f for f in os.listdir(input_directory) if f.endswith('.pdf')])
 
     data = []
 
     for pdf_file in pdf_files:
-        text = extract_text(os.path.join(input_directory, pdf_file))
-        data.append(extract_data(text, pdf_file))
+        text = extract_pdf_text(os.path.join(input_directory, pdf_file))
+        data.append(extract_pdf_data(text, pdf_file))
 
     data = sorted(data, key=lambda d: d['date'])
     enhance(data)
     write_csv(data, output_csv)
 
 
+def process_docx_files(input_directory, output_csv):
+    docx_files = sorted([f for f in os.listdir(input_directory) if f.endswith('.docx')])
+
+    data = []
+
+    for docx_file in docx_files:
+        text = extract_docx_text(os.path.join(input_directory, docx_file))
+        data.append(extract_docx_data(text, docx_file))
+
+    data = sorted(data, key=lambda d: d['date'])
+    write_csv(data, output_csv)
+
+
 if __name__ == '__main__':
-    process_files(sys.argv[1], sys.argv[2])
+    process_pdf_files(sys.argv[1], sys.argv[2])
+    process_docx_files(sys.argv[3], sys.argv[4])
