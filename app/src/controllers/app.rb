@@ -398,10 +398,10 @@ class Covid19Xap < Sinatra::Application
     return charts
   end
 
-  def _timestamp
+  def _timestamp(format='<i>%d/%m %H:%M</i>')
     latest_timestamp = File.mtime(@filename)
     tz = TZInfo::Timezone.get('America/Sao_Paulo')
-    return tz.strftime('<i>%d/%m %H:%M</i>', latest_timestamp)
+    return tz.strftime(format, latest_timestamp)
   end
 
 
@@ -414,6 +414,18 @@ class Covid19Xap < Sinatra::Application
 
   get '/loaderio-9062b491158e6847ab220ae764edff3f/' do
     return 'loaderio-9062b491158e6847ab220ae764edff3f'
+  end
+
+  get '/sitemap.xml' do
+    lastmod = self._timestamp('%y-%m-%d')
+    return \
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+        <urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"> 
+          <url>
+            <loc>https://covid19-xap.herokuapp.com/</loc>
+            <lastmod>#{lastmod}</lastmod>
+          </url>
+        </urlset>"
   end
 
   run!
