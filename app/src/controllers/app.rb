@@ -210,7 +210,7 @@ class Covid19Xap < Sinatra::Application
     @charts = self._charts(@data, @icu_data)
   end
 
-  def _charts(data, icu_data, start_date=(Date.today - 7).strftime('%Y-%m-%d'), end_date=Date.today.strftime('%Y-%m-%d'))
+  def _charts(data, icu_data, start_date=(Date.today - 15).strftime('%Y-%m-%d'), end_date=Date.today.strftime('%Y-%m-%d'))
     series = {}
 
     data.keys.each do |metric|
