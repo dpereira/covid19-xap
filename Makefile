@@ -30,6 +30,7 @@ $(CHAPECO_DATA_DIR): $(PDF_DATA_DIR)
 $(CHAPECO_DOCX_DATA_DIR): $(DOCX_DATA_DIR)
 	mkdir -p $(CHAPECO_DOCX_DATA_DIR)
 setup:
+	pip install -r requirements.txt
 	docker-compose build
 
 update-data: clean download extract extrapolate
