@@ -54,22 +54,31 @@ def extract_pdf_data(text, pdf_filename):
         'tested': 0
     }
 
-    regex = {
-        'tracked': '\n(.+)\nmonitorados',
-        'tested': '\n(.+)\ntestados',
-        'discarded': '\n(.+)\ndescartados',
-        'confirmed': '\n(.+)\nconfirmados',
-        'confirmed_in_infirmary': '\n(.+)\ninternados em',
-        'confirmed_in_intensive_care': '\n(.+)\ninternados em',
-        'confirmed_deaths': '\n(.+)\nóbitos',
-        'confirmed_home_isolation': '\n(.+)\nisolamento',
-        'confirmed_recovered': '\n(.+)\nrecuperados',
-        'suspected': '\n(.+)\nsuspeitos',
-        'suspected_in_infirmary': '\n(.+)\ninternados em',
-        'suspected_in_intensive_care': '\n(.+)\ninternados em',
-        'suspected_deaths': '\n(.+)\nÓbitos',
-        'suspected_home_isolation': '\n(.+)\nisolamento',
-    }
+    regex = [
+        {
+            'tracked': '\n(.+)\nmonitorados',
+            'tested': '\n(.+)\ntestados',
+            'discarded': '\n(.+)\ndescartados',
+            'confirmed': '\n(.+)\nconfirmados',
+            'confirmed_in_infirmary': '\n(.+)\ninternados em',
+            'confirmed_in_intensive_care': '\n(.+)\ninternados em',
+            'confirmed_deaths': '\n(.+)\nóbitos',
+            'confirmed_home_isolation': '\n(.+)\nisolamento',
+            'confirmed_recovered': '\n(.+)\nrecuperados',
+            'suspected': '\n(.+)\nsuspeitos',
+            'suspected_in_infirmary': '\n(.+)\ninternados em',
+            'suspected_in_intensive_care': '\n(.+)\ninternados em',
+            'suspected_deaths': '\n(.+)\nÓbitos',
+            'suspected_home_isolation': '\n(.+)\nisolamento'
+        },
+        {
+            'confirmed': '\n(.+)\nconfirmados',
+            'active': '\n(.+)\nativos',
+            'confirmed_recovered': '\n(.+)\nrecuperados',
+            'confirmed_total_deaths': '\n(.+)\nóbitos',
+            'tested': '\n(.+)\ntestados'
+        }
+    ]
 
     parsed_date = extract_filename_date(pdf_filename)
     
@@ -77,7 +86,8 @@ def extract_pdf_data(text, pdf_filename):
         'date': parsed_date.strftime('%Y-%m-%d')
     }
 
-    data.update(extract_from_text(regex, text, defaults))
+    for r in regex:
+        data.update(extract_from_text(r, text, defaults))
 
     return data
 
@@ -100,10 +110,12 @@ def extract_from_text(regex, text, defaults={}):
 
 
 def enhance_datapoint(data, prior):
-    try:
-        data['active'] = data['confirmed'] - data['confirmed_recovered'] - data['confirmed_deaths']
-    except (KeyError, TypeError, ValueError):
-        data['active'] = prior['active']
+
+    if 'active' not in data:
+        try:
+            data['active'] = data['confirmed'] - data['confirmed_recovered'] - data['confirmed_deaths']
+        except (KeyError, TypeError, ValueError):
+            data['active'] = prior['active']
 
     data['tests_performed'] = 0
 
@@ -112,6 +124,12 @@ def enhance_datapoint(data, prior):
             data['tests_performed'] = data['confirmed'] + data['discarded'] - (prior['confirmed'] + prior['discarded'])
         except (KeyError, TypeError, ValueError):
             data['tests_performed'] = ''
+
+    if 'confirmed_deaths' not in data and 'confirmed_total_deaths' in data: 
+        try:
+            data['confirmed_deaths'] = data['confirmed_total_deaths']
+        except (KeyError, TypeError, ValueError):
+            data['confirmed_deaths'] = 0
 
 
 def enhance(dataset):
@@ -176,5 +194,10 @@ def process_docx_files(input_directory, output_csv):
 
 
 if __name__ == '__main__':
-    process_pdf_files(sys.argv[1], sys.argv[2])
-    process_docx_files(sys.argv[3], sys.argv[4])
+    pdf_input = sys.argv[1]
+    pdf_output = sys.argv[2]
+    process_pdf_files(pdf_input, pdf_output)
+
+    docx_input = sys.argv[3]
+    docx_output = sys.argv[4]
+    process_docx_files(docx_input, docx_output)
