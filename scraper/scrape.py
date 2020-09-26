@@ -34,8 +34,8 @@ def extract_filename_date(filename):
 def extract_docx_data(text, docx_filename):
 
     regex = {
-        'public_icu_occupation': 'LEITOS UTI PÚBLICO\n\n(\\d+) %',
-        'private_icu_occupation': 'LEITOS UTI PRIVADO\n\n(\\d+) %'
+        'public_icu_occupation': 'LEITOS UTI PÚBLICO\n\n(\\d+) ?%',
+        'private_icu_occupation': 'LEITOS UTI PRIVADO\n\n(\\d+) ?%'
     }
 
     parsed_date = extract_filename_date(docx_filename)
